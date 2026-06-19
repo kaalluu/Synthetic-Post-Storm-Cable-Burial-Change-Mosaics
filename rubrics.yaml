@@ -1,0 +1,55 @@
+rubrics:
+  - importance: REQUIRED
+    type: DATA_HANDLING
+    criterion: Splits each paired sonar mosaic into baseline and post-storm panels and uses the question_type to compare the relevant regions.
+    rationale: The task is a repeat-pass change audit; treating the image as a single static sonar frame misses the central before/after evidence.
+
+  - importance: REQUIRED
+    type: DATA_HANDLING
+    criterion: Produces exactly one A/B/C/D answer_label prediction for every question_id in test.csv with no duplicate or missing IDs.
+    rationale: The grader requires a complete one-to-one match to private test audit rows.
+
+  - importance: REQUIRED
+    type: MODELING
+    criterion: Does not use external sonar datasets, pretrained models, internet access, private answer labels, or generator trace columns.
+    rationale: The benchmark is intended to evaluate reasoning from the provided paired mosaics, public metadata, and audit prompts only.
+
+  - importance: REQUIRED
+    type: TRAINING
+    criterion: Uses validation grouped by scene_id so all audit rows from the same paired mosaic remain in the same split.
+    rationale: Multiple rows can reference the same before/after mosaic; random row splits leak scene-level information.
+
+  - importance: REQUIRED
+    type: MODELING
+    criterion: Achieves at least 0.55 robust grouped accuracy on the private test set.
+    rationale: Random guessing is approximately 0.25 and a naive row-format baseline is far lower; this threshold requires meaningful panel comparison and audit-item reasoning without demanding near-perfect synthetic trace recovery.
+
+  - importance: RECOMMENDED
+    type: FEATURE_ENGINEERING
+    criterion: Builds explicit before/after change features such as panel differences, exposure-gain maps, new dark scar lines, and newly appearing crossing clutter.
+    rationale: The labels depend on changes between repeat passes, not just the post-storm panel alone.
+
+  - importance: RECOMMENDED
+    type: FEATURE_ENGINEERING
+    criterion: Uses meters_per_pixel or range_setting_m for exposure_delta_bin and burial_compliance rather than raw pixel length alone.
+    rationale: The same pixel-length exposure can correspond to different physical lengths at different survey scale settings.
+
+  - importance: RECOMMENDED
+    type: FEATURE_ENGINEERING
+    criterion: Distinguishes true post-storm cable exposure from seabed ripples, acoustic shadow, sensor dropout, and clutter decoys.
+    rationale: Hidden OOD groups intentionally include sonar artifacts that can mimic new exposure or scars.
+
+  - importance: RECOMMENDED
+    type: MODELING
+    criterion: Reports or optimizes validation performance by question_type, visibility, seabed_texture, difficulty, and scene_id groups.
+    rationale: The final score includes worst-group terms, so a method that ignores one audit decision type or one difficult rendering condition is heavily penalized.
+
+  - importance: RECOMMENDED
+    type: AGENT_BEHAVIOR
+    criterion: Starts with a small interpretable panel-difference baseline before trying larger image models.
+    rationale: Interpretable baselines help verify panel alignment, label format, and scale handling before using more expensive approaches.
+
+  - importance: UNIVERSAL
+    type: COMMUNICATION
+    criterion: Explains how each audit item maps to before/after sonar evidence, scale metadata, and operational response choices.
+    rationale: Clear reasoning helps reviewers verify that the solution is performing a paired cable-burial audit rather than exploiting priors.

@@ -1,0 +1,13 @@
+metric:
+  name: robust_grouped_accuracy
+  direction: maximize
+  range: [1e-9, 1]
+
+submission:
+  file: submission.csv
+  id_column: question_id
+  prediction_column: answer_label
+
+runtime:
+  type: kaggle
+  gpu_required: false

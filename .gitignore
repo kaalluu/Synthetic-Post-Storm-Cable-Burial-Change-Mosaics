@@ -1,0 +1,7 @@
+raw/
+public/
+private/
+working/
+*.zip
+__pycache__/
+*.pyc
